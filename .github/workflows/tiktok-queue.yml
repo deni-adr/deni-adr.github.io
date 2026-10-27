@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Post due videos
         run: |
-          if [ -f data/tokens.enc ] && ls queue/*.json >/dev/null 2>&1; then set -o pipefail; python3 scripts/tiktok.py queue 2>&1 | tee >(grep -v '::add-mask::' > data/last_queue.log); else echo "Nothing to do"; fi
+          if ls data/tokens.enc data/tokens/*.enc >/dev/null 2>&1 && ls queue/*.json >/dev/null 2>&1; then set -o pipefail; python3 scripts/tiktok.py queue 2>&1 | tee >(grep -v '::add-mask::' > data/last_queue.log); else echo "Nothing to do"; fi
       - name: Save changes
         if: always()
         run: |
