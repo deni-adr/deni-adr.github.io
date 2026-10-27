@@ -1,4 +1,4 @@
-Creator: uyunks_HnR | allowed privacy: ['FOLLOWER_OF_CREATOR', 'MUTUAL_FOLLOW_FRIENDS', 'SELF_ONLY']
 Chunk 1/1: HTTP 201
-Status: PUBLISH_COMPLETE 
-Posted as SELF_ONLY.
+Status: PROCESSING_UPLOAD 
+Status: SEND_TO_USER_INBOX 
+Sent to TikTok inbox. Open TikTok notifications to finish and post.
