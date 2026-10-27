@@ -119,8 +119,16 @@ def queue():
             except SystemExit as e:
                 print("FAILED", qf, e); item["error"] = str(e); json.dump(item, open(qf, "w"), indent=2)
 
+def revoke():
+    t = load_tokens()
+    s, d = req("POST", API + "/v2/oauth/revoke/", {"client_key": KEY, "client_secret": SECRET, "token": t["access_token"]},
+               {"Content-Type": "application/x-www-form-urlencoded"})
+    print("Revoke HTTP", s, d.get("error", "") if isinstance(d, dict) else "")
+    os.remove(TOK)
+
 if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "auth": auth(sys.argv[2])
     elif cmd == "post": post(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "", sys.argv[4] if len(sys.argv) > 4 else "")
     elif cmd == "queue": queue()
+    elif cmd == "revoke": revoke()
