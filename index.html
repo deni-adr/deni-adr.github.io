@@ -14,7 +14,7 @@
 (function(){
  var K="sbawe2jipfn5lpa5io", R="https://deni-adr.github.io/";
  var st=Math.random().toString(36).slice(2);
- var u="https://www.tiktok.com/v2/auth/authorize/?client_key="+K+"&scope="+encodeURIComponent("user.info.basic,video.upload,video.publish")+"&response_type=code&redirect_uri="+encodeURIComponent(R)+"&state="+st;
+ var u="https://www.tiktok.com/v2/auth/authorize/?client_key="+K+"&scope="+encodeURIComponent("user.info.basic,video.upload,video.publish")+"&response_type=code&redirect_uri="+encodeURIComponent(R)+"&state="+st+"&disable_auto_auth=1";
  document.getElementById("tt-login").href=u;
  var q=new URLSearchParams(location.search);
  if(q.get("code")){document.getElementById("login").style.display="none";document.getElementById("done").style.display="block";document.getElementById("code").textContent=q.get("code");}
