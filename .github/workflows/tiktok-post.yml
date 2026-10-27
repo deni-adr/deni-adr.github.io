@@ -1,0 +1,26 @@
+name: TikTok - Post video now
+on:
+  workflow_dispatch:
+    inputs:
+      video: {description: "Video URL or repo path (e.g. videos/clip.mp4)", required: true}
+      caption: {description: "Caption", required: false, default: ""}
+      privacy: {description: "PUBLIC_TO_EVERYONE / MUTUAL_FOLLOW_FRIENDS / FOLLOWER_OF_CREATOR / SELF_ONLY", required: false, default: "SELF_ONLY"}
+concurrency: uyunks
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TIKTOK_CLIENT_KEY: sbawe2jipfn5lpa5io
+      TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+      TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/tiktok.py post "${{ inputs.video }}" "${{ inputs.caption }}" "${{ inputs.privacy }}"
+      - name: Save changes
+        if: always()
+        run: |
+          git config user.name "uyunks-bot"; git config user.email "uyunks-bot@users.noreply.github.com"
+          git add -A data queue 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Uyunks: update state" && git push)
