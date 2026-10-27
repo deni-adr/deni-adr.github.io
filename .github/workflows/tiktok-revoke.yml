@@ -1,6 +1,8 @@
 name: TikTok - Revoke access
 on:
   workflow_dispatch:
+    inputs:
+      account: {description: "Account label (main = uyunks_HnR; e.g. akun2)", required: false, default: "main"}
 concurrency: uyunks
 jobs:
   revoke:
@@ -11,6 +13,7 @@ jobs:
       TIKTOK_CLIENT_KEY: sbawe2jipfn5lpa5io
       TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
       TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
+      ACCOUNT: ${{ inputs.account }}
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/tiktok.py revoke
