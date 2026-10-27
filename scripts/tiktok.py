@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """Uyunks TikTok engine: auth (code -> tokens), post (one video), queue (scheduled posts).
 Tokens are stored encrypted (AES via openssl, passphrase in TOKEN_PASSPHRASE secret) in data/tokens.enc."""
-import json, os, sys, time, subprocess, urllib.request, urllib.parse, datetime, glob
+import json, os, re, sys, time, subprocess, urllib.request, urllib.parse, datetime, glob
 
 API = "https://open.tiktokapis.com"
 KEY = os.environ["TIKTOK_CLIENT_KEY"]
 SECRET = os.environ["TIKTOK_CLIENT_SECRET"]
 PASS = os.environ["TOKEN_PASSPHRASE"]
 REDIRECT = "https://deni-adr.github.io/"
-TOK = "data/tokens.enc"
+def tok_path(acct):
+    acct = re.sub(r"[^a-z0-9_-]", "", (acct or "main").strip().lower()) or "main"
+    return "data/tokens.enc" if acct == "main" else f"data/tokens/{acct}.enc"
+
+ACCOUNT = os.environ.get("ACCOUNT", "main") or "main"
+TOK = tok_path(ACCOUNT)
 
 def mask(v):
     if v: print(f"::add-mask::{v}")
@@ -33,7 +38,7 @@ def req(method, url, data=None, headers=None, raw=None):
 
 def save_tokens(t):
     t["saved_at"] = int(time.time())
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(os.path.dirname(TOK), exist_ok=True)
     p = subprocess.run(["openssl", "enc", "-aes-256-cbc", "-pbkdf2", "-salt", "-a", "-pass", "env:TOKEN_PASSPHRASE", "-out", TOK],
                        input=json.dumps(t).encode(), check=True)
 
@@ -62,7 +67,7 @@ def auth(code):
     d = token_call({"grant_type": "authorization_code", "code": code, "redirect_uri": REDIRECT})
     save_tokens(d)
     s, u = req("GET", API + "/v2/user/info/?fields=open_id,display_name", headers={"Authorization": "Bearer " + d["access_token"]})
-    print("Connected TikTok account:", u.get("data", {}).get("user", {}).get("display_name"), "| scopes:", d.get("scope"))
+    print("Account label:", ACCOUNT, "| Connected TikTok account:", u.get("data", {}).get("user", {}).get("display_name"), "| scopes:", d.get("scope"))
 
 def fetch_video(src):
     if src.startswith("http"):
@@ -142,12 +147,17 @@ def upload_inbox(src, H):
     print("Sent to TikTok inbox. Open TikTok notifications to finish and post.")
 
 def queue():
+    global TOK
     now = datetime.datetime.now(datetime.timezone.utc)
     for qf in sorted(glob.glob("queue/*.json")):
         item = json.load(open(qf))
         at = datetime.datetime.fromisoformat(item["at"].replace("Z", "+00:00"))
         if at <= now:
-            print("Posting", qf)
+            TOK = tok_path(item.get("account", "main"))
+            print("Posting", qf, "to account", item.get("account", "main"))
+            if not os.path.exists(TOK):
+                print("FAILED", qf, "account not connected"); item["error"] = "account not connected"
+                json.dump(item, open(qf, "w"), indent=2); continue
             try:
                 post(item["video"], item.get("caption", ""), item.get("privacy", ""))
                 os.makedirs("queue/done", exist_ok=True); os.rename(qf, qf.replace("queue/", "queue/done/"))
