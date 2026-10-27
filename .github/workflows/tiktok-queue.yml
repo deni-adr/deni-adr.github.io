@@ -1,0 +1,26 @@
+name: TikTok - Scheduled queue
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+concurrency: uyunks
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TIKTOK_CLIENT_KEY: sbawe2jipfn5lpa5io
+      TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+      TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Post due videos
+        run: |
+          if [ -f data/tokens.enc ] && ls queue/*.json >/dev/null 2>&1; then python3 scripts/tiktok.py queue; else echo "Nothing to do"; fi
+      - name: Save changes
+        if: always()
+        run: |
+          git config user.name "uyunks-bot"; git config user.email "uyunks-bot@users.noreply.github.com"
+          git add -A data queue 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Uyunks: update state" && git push)
