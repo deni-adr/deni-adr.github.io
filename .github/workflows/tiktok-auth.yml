@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       code: {description: "Authorization code from the site", required: true}
+      account: {description: "Account label (main = uyunks_HnR; e.g. akun2)", required: false, default: "main"}
 concurrency: uyunks
 jobs:
   auth:
@@ -13,9 +14,12 @@ jobs:
       TIKTOK_CLIENT_KEY: sbawe2jipfn5lpa5io
       TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
       TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
+      ACCOUNT: ${{ inputs.account }}
     steps:
       - uses: actions/checkout@v4
-      - run: echo "::add-mask::${{ inputs.code }}"; python3 scripts/tiktok.py auth "${{ inputs.code }}"
+      - run: |
+          echo "::add-mask::${{ inputs.code }}"; mkdir -p data; set -o pipefail
+          python3 scripts/tiktok.py auth "${{ inputs.code }}" 2>&1 | tee >(grep -v '::add-mask::' > data/last_auth.log)
       - name: Save changes
         if: always()
         run: |
