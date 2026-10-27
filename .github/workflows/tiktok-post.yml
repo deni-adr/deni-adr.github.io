@@ -17,7 +17,9 @@ jobs:
       TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/tiktok.py post "${{ inputs.video }}" "${{ inputs.caption }}" "${{ inputs.privacy }}"
+      - run: |
+          mkdir -p data; set -o pipefail
+          python3 scripts/tiktok.py post "${{ inputs.video }}" "${{ inputs.caption }}" "${{ inputs.privacy }}" 2>&1 | tee data/last_post.log
       - name: Save changes
         if: always()
         run: |
