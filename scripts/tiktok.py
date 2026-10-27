@@ -72,6 +72,9 @@ def fetch_video(src):
 def post(src, caption, privacy=""):
     tok = access_token()
     H = {"Authorization": "Bearer " + tok, "Content-Type": "application/json; charset=UTF-8"}
+    inbox = privacy.upper() == "INBOX"
+    if inbox:
+        return upload_inbox(src, H)
     s, ci = req("POST", API + "/v2/post/publish/creator_info/query/", {}, H)
     info = ci.get("data", {})
     opts = info.get("privacy_level_options", ["SELF_ONLY"])
@@ -105,6 +108,38 @@ def post(src, caption, privacy=""):
         if status in ("PUBLISH_COMPLETE", "FAILED"): break
     if status != "PUBLISH_COMPLETE": sys.exit(f"Post not completed: {status}")
     print(f"Posted as {privacy}.")
+
+def upload_chunks(path, url, size, chunk, count):
+    with open(path, "rb") as f:
+        for i in range(count):
+            start = i * chunk
+            end = size - 1 if i == count - 1 else start + chunk - 1
+            f.seek(start); blob = f.read(end - start + 1)
+            s, _ = req("PUT", url, raw=blob, headers={"Content-Type": "video/mp4", "Content-Length": str(len(blob)),
+                                                      "Content-Range": f"bytes {start}-{end}/{size}"})
+            print(f"Chunk {i+1}/{count}: HTTP {s}")
+
+def upload_inbox(src, H):
+    """Draft mode: video goes to the creator's TikTok inbox; they finish and post it publicly in the app."""
+    path = fetch_video(src); size = os.path.getsize(path)
+    MB = 1024 * 1024
+    chunk = size if size <= 64 * MB else 10 * MB
+    count = max(1, size // chunk)
+    body = {"source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": chunk, "total_chunk_count": count}}
+    s, d = req("POST", API + "/v2/post/publish/inbox/video/init/", body, H)
+    if d.get("error", {}).get("code") not in ("ok", None) or "data" not in d:
+        sys.exit(f"Inbox init error: {d.get('error')}")
+    pid, url = d["data"]["publish_id"], d["data"]["upload_url"]
+    upload_chunks(path, url, size, chunk, count)
+    status = None
+    for _ in range(40):
+        time.sleep(10)
+        s, st = req("POST", API + "/v2/post/publish/status/fetch/", {"publish_id": pid}, H)
+        status = st.get("data", {}).get("status")
+        print("Status:", status, st.get("data", {}).get("fail_reason", ""))
+        if status in ("SEND_TO_USER_INBOX", "PUBLISH_COMPLETE", "FAILED"): break
+    if status not in ("SEND_TO_USER_INBOX", "PUBLISH_COMPLETE"): sys.exit(f"Inbox upload not completed: {status}")
+    print("Sent to TikTok inbox. Open TikTok notifications to finish and post.")
 
 def queue():
     now = datetime.datetime.now(datetime.timezone.utc)
