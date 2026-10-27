@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           mkdir -p data; set -o pipefail
-          python3 scripts/tiktok.py post "${{ inputs.video }}" "${{ inputs.caption }}" "${{ inputs.privacy }}" 2>&1 | tee data/last_post.log
+          python3 scripts/tiktok.py post "${{ inputs.video }}" "${{ inputs.caption }}" "${{ inputs.privacy }}" 2>&1 | tee >(grep -v '::add-mask::' > data/last_post.log)
       - name: Save changes
         if: always()
         run: |
