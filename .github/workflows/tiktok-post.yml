@@ -4,7 +4,8 @@ on:
     inputs:
       video: {description: "Video URL or repo path (e.g. videos/clip.mp4)", required: true}
       caption: {description: "Caption", required: false, default: ""}
-      privacy: {description: "PUBLIC_TO_EVERYONE / MUTUAL_FOLLOW_FRIENDS / FOLLOWER_OF_CREATOR / SELF_ONLY", required: false, default: "SELF_ONLY"}
+      privacy: {description: "INBOX (draft to TikTok inbox) / SELF_ONLY / FOLLOWER_OF_CREATOR / MUTUAL_FOLLOW_FRIENDS", required: false, default: "INBOX"}
+      account: {description: "Account label (main = uyunks_HnR; e.g. akun2)", required: false, default: "main"}
 concurrency: uyunks
 jobs:
   post:
@@ -15,6 +16,7 @@ jobs:
       TIKTOK_CLIENT_KEY: sbawe2jipfn5lpa5io
       TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
       TOKEN_PASSPHRASE: ${{ secrets.TOKEN_PASSPHRASE }}
+      ACCOUNT: ${{ inputs.account }}
     steps:
       - uses: actions/checkout@v4
       - run: |
