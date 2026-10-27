@@ -1,0 +1,4 @@
+::add-mask::act.YjdJSM7Uaf88ylZQvEtgK6KBf3HZ6qzpdT2WnCjYDYcwGx9Q5Aho5nyb0Nje!5182.s1
+::add-mask::rft.fr6tjioCJTemLOr0J0VIU6GLkqVxJn1qLVY0tQSRBgNlo9v53mMXZIxXjCnd!5160.s1
+Creator: uyunks_HnR | allowed privacy: ['PUBLIC_TO_EVERYONE', 'MUTUAL_FOLLOW_FRIENDS', 'SELF_ONLY']
+Init error: {'code': 'unaudited_client_can_only_post_to_private_accounts', 'message': 'Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/', 'log_id': '202610272016552B0AF3EC3042611018CE'}
