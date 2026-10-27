@@ -1,7 +1,26 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Uyunks</title><link rel="stylesheet" href="style.css"></head><body>
+<!DOCTYPE html><html lang="en"><head><link rel="icon" href="icon.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Uyunks</title><link rel="stylesheet" href="style.css"></head><body>
 <nav><a href="./">Home</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></nav>
-<h1>Uyunks</h1>
+<h1><img src="icon.png" alt="" width="48" height="48" style="vertical-align:middle;border-radius:10px;margin-right:10px">Uyunks</h1>
 <p>Uyunks is a personal tool that lets the account owner schedule and publish their own videos, mainly affiliate product content, to their own TikTok account via TikTok Login Kit and the Content Posting API.</p>
+<section id="connect" style="margin:28px 0;padding:20px;border:1px solid #ddd;border-radius:12px">
+<h2 style="margin-top:0">Connect your TikTok account</h2>
+<div id="login"><p>Sign in with TikTok to let Uyunks post videos to your own account.</p>
+<a id="tt-login" href="#" style="display:inline-block;background:#000;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600">Login with TikTok</a></div>
+<div id="done" style="display:none"><p><strong>&#10003; TikTok account connected.</strong> Authorization received. Uyunks will now publish your scheduled videos to your TikTok account.</p>
+<p style="font-size:13px;color:#666">Authorization code: <code id="code" style="word-break:break-all"></code></p></div>
+<div id="err" style="display:none;color:#b00"></div>
+</section>
+<script>
+(function(){
+ var K="awhpomnhoofu0a7q", R="https://deni-adr.github.io/";
+ var st=Math.random().toString(36).slice(2);
+ var u="https://www.tiktok.com/v2/auth/authorize/?client_key="+K+"&scope="+encodeURIComponent("user.info.basic,video.upload,video.publish")+"&response_type=code&redirect_uri="+encodeURIComponent(R)+"&state="+st;
+ document.getElementById("tt-login").href=u;
+ var q=new URLSearchParams(location.search);
+ if(q.get("code")){document.getElementById("login").style.display="none";document.getElementById("done").style.display="block";document.getElementById("code").textContent=q.get("code");}
+ else if(q.get("error")){var e=document.getElementById("err");e.style.display="block";e.textContent="Login failed: "+q.get("error")+" "+(q.get("error_description")||"");}
+})();
+</script>
 <h2>How it works</h2>
 <ol><li>The owner signs in with TikTok (Login Kit) and grants the scopes user.info.basic, video.upload and video.publish.</li><li>The owner chooses a video, writes the caption and picks the privacy setting.</li><li>Uyunks publishes the video to the owner's own TikTok account through the Content Posting API.</li></ol>
 <p>Uyunks is not offered to the public. It is used only by its owner to manage their own TikTok account.</p>
